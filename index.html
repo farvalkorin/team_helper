@@ -1,0 +1,153 @@
+<head></head>
+<body>
+    <script type="text/javascript">
+        var changed = false;
+        var SR_LIMIT = 17600;
+
+        function len(o) {
+            return o.length;
+        }
+        var print = console.log;
+
+        function bigproduct(theSameList) {
+            return product(theSameList,
+                product(theSameList,
+                    product(theSameList,
+                        product(theSameList,
+                            product(theSameList, theSameList)))));
+        }
+
+        function product(l1, l2) {
+            var output = [];
+            for (var i = l1.length - 1; i >= 0; i--) {
+                var playerlist1 = l1[i];
+                playerlist1.sort();
+                for (var j = l2.length - 1; j >= 0; j--) {
+                    var playerlist2 = l2[j];
+                    playerlist2.sort();
+                    var skipCombo = false;
+                    for (var k = len(playerlist1) - 1; k >= 0; k--) {
+                        for (var l = len(playerlist2) - 1; l >= 0; l--) {
+                            // print("Comparing: " + playerlist1[k][0] + " to " + playerlist2[l][0]);
+                            if (playerlist1[k][0] == playerlist2[l][0]) {
+                                skipCombo = true;
+                                // print("Failed");
+                            } else {
+                                // print("Passed");
+                            }
+                        }
+                    }
+                    if (!skipCombo) {
+                        output.push(playerlist1.concat(playerlist2));
+                        output[len(output) - 1].sort();
+                    }
+                }
+            }
+            var uniqueSet = {};
+            for (var i = output.length - 1; i >= 0; i--) {
+                // print("Unique? " + "" + output[i]);
+                uniqueSet["" + output[i]] = output[i];
+            };
+            output = []
+            for (var property in uniqueSet) {
+                if (uniqueSet.hasOwnProperty(property)) {
+                    output.push(uniqueSet[property]);                    
+                }
+            };
+            return output;
+        }
+
+        function playerSets(playerList) {
+            var playerOptions = bigproduct(playerList);
+            var reducedOptions = [];
+            for (var i = playerOptions.length - 1; i >= 0; i--) {
+                var optionList = playerOptions[i];
+                var totalSR = 0;
+                var playerNames = [];
+                var positionsTaken = {};
+                var positionViolation = false;
+                for (var j = 0; j < optionList.length; j++) {
+                    var [player, sr, position] = optionList[j];
+                    sr = parseInt(sr, 10);
+                    totalSR += sr;
+                    playerNames.push("" + player + " (" + position + ")");
+                    if (positionsTaken[position] === undefined) {
+                        positionsTaken[position] = 1;
+                    } else {
+                        positionViolation = true;
+                    }
+                }
+                if (positionViolation) {
+                    continue;
+                }
+                if (totalSR <= SR_LIMIT) {
+                    if (totalSR >= 10000) {
+                        prefix = "" + totalSR;
+                    } else if (totalSR >= 1000) {
+                        prefix = "0" + totalSR;
+                    } else if (totalSR >= 100) {
+                        prefix = "00" + totalSR;
+                    } else {
+                        prefix = "You're wasting my time";
+                    }
+                    reducedOptions.push("" + prefix + " : " + playerNames.join(", "));
+                }
+            };
+            reducedOptions.sort();
+            reducedOptions.reverse();
+            return reducedOptions;
+        }
+
+        function inputChanged(event) {
+            changed = true;
+        }
+        function processInput() {
+            var input = document.querySelector("#input");
+            var output = document.querySelector("#output");
+            var inputFullText = input.value;
+            var inputLines = inputFullText.split('\n');
+            var playerListing = [];
+            var outputLines = [];
+            for (var i = 0; i < inputLines.length; i++) {
+                var line = inputLines[i];
+                if (len(line) < 4) {
+                    continue;
+                }
+                var splitline = line.split(",");
+                if (len(splitline) != 3) {
+                    continue;
+                }
+                if (len(splitline[0]) == 0 || len(splitline[1]) == 0 || len(splitline[2]) == 0) {
+                    continue;
+                }
+                var [player, sr, position] = splitline;
+                playerListing.push([splitline]);
+            };
+            print('playerListing');
+            print(len(playerListing));
+            print(playerListing);
+            if (len(playerListing) < 6) {
+                output.innerText = "Not Enough Players";
+            } else {
+                print("Processing Player Combinations, this may take a while");
+                output.innerText = "Processing Player Combinations, this may take a while";
+                output.innerText = playerSets(playerListing).join("\n");
+            }
+        }
+    </script>
+<label for="input" style="display: block;">Input (PlayerID, SR, Position)</label>
+<textarea id="input" rows="10", cols="80" oninput="inputChanged()">
+a,1000,MT
+b,1100,OT
+c,1200,HS
+d,1400,PR
+e,1800,FS
+f,2600,MS
+</textarea>
+
+<button style="display: block;" onclick="processInput();">Magic</button>
+
+<label for="output" style="display: block;">Output</label>
+<p id="output">
+</p>
+</body>
