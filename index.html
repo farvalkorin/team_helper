@@ -2,7 +2,8 @@
 <body>
     <script type="text/javascript">
         var changed = false;
-        var SR_LIMIT = 17600;
+        var HARD_SR_LIMIT = 18100;
+        var SOFT_SR_LIMIT = 17600;
 
         function len(o) {
             return o.length;
@@ -80,7 +81,7 @@
                 if (positionViolation) {
                     continue;
                 }
-                if (totalSR <= SR_LIMIT) {
+                if (totalSR <= HARD_SR_LIMIT) {
                     if (totalSR >= 10000) {
                         prefix = "" + totalSR;
                     } else if (totalSR >= 1000) {
@@ -89,6 +90,9 @@
                         prefix = "00" + totalSR;
                     } else {
                         prefix = "You're wasting my time";
+                    }
+                    if (totalSR > SOFT_SR_LIMIT) {
+                        prefix = "*" + prefix;
                     }
                     reducedOptions.push("" + prefix + " : " + playerNames.join(", "));
                 }
